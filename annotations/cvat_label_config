@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Left_Eye",
+    "id": 5024618,
+    "color": "#FF0000",
+    "type": "rectangle",
+    "attributes": []
+  },
+  {
+    "name": "Right_Eye",
+    "id": 5024619,
+    "color": "#00FF00",
+    "type": "rectangle",
+    "attributes": []
+  },
+  {
+    "name": "Mouth",
+    "id": 5024620,
+    "color": "#0000FF",
+    "type": "rectangle",
+    "attributes": []
+  },
+  {
+    "name": "Head_Line",
+    "id": 5024621,
+    "color": "#FFFF00",
+    "type": "polyline",
+    "attributes": []
+  },
+  {
+    "name": "Closed_Left",
+    "id": 5212529,
+    "color": "#ff00cc",
+    "type": "rectangle",
+    "attributes": []
+  },
+  {
+    "name": "Closed_Right",
+    "id": 5212530,
+    "color": "#aaf0d1",
+    "type": "rectangle",
+    "attributes": []
+  },
+  {
+    "name": "Open_Mouth",
+    "id": 5213127,
+    "color": "#b83df5",
+    "type": "any",
+    "attributes": []
+  }
+]
