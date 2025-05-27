@@ -1,5 +1,5 @@
-path: D:/semester4/projektnipraktikum/model_1/m_1_milos_o
-train: images/train
+#path: ...
+train: images/tr#ain
 val: images/train
 
 names:

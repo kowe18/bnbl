@@ -3,10 +3,10 @@
 from ultralytics import YOLO
 
 # path to best.pt
-model = YOLO(r"D:\semester4\projektnipraktikum\model_1\m_1_milos_o\runs\detect\train\weights\best.pt")
+model = YOLO(r"D:\semester4\projektnipraktikum\model_1\model1.3\runs\detect\train2\weights\best.pt")
 
 results = model.predict(
-    source=r"ezgif-44b37d4e0bbe0c.mov", # path to video used for testing
+    source=r"IMG_3631.mov", # path to video used for testing
     conf=0.25,
     show=True,
     save=True

@@ -1,23 +1,21 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 from ultralytics import YOLO
 
-model = YOLO("yolov8m.pt")
+model = YOLO("yolov8s.pt")
+#model = YOLO("runs/detect/train/weights/best.pt")
+
 
 model.train(
     data="dataset.yaml",
-    epochs=10,
+    epochs=40,
     imgsz=640,
-    device="cpu"  # "cuda" if we are using GPU
+    device="cpu",  # "cuda" if we are using GPU
 )
 
 metrics = model.val()
 
-# Predict (detect) objects in images/train (source can be file, folder, URL, camera...)
-results = model.predict(
-    source="images/train",
-    show=True,
-    save=True,
-    conf=0.25
-)
-
 # Export as ONNX format
 model.export(format="onnx")
+
