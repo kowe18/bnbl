@@ -52,6 +52,7 @@ This project aims to build a real-time driver fatigue detection system that moni
   Rule-based logic using angles, facial movement thresholds, and landmark shifts.
 
 - 🧩 **Multi-Modal Vectorization Model**
+  
   Collect, normalize, and structure the outputs from different subsystems into a single feature vector per frame.
 
 - 🖥️ **Live GUI Visualization**  
