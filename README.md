@@ -4,23 +4,24 @@
 We are a team of students of Faculty of Electrical Engineering and Computer Science (UM FERI) in Maribor, Slovenia. We are researchers working on intelligent driver monitoring systems, as a project. Below are the members and contributors who helped shape this project.
 <table>
   <tr>
-    <td align="center">
-      <img src="images/milos.png" width="120" height="120" style="border-radius: 50%; border: none;"><br/>
+    <td align="center" valign="top">
+      <img src="images/milos.png" width="120" height="120"><br/>
       <strong>Miloš Avakumović</strong><br/>
       <a href="mailto:milos.avakumovic@student.um.si">milos.avakumovic@student.um.si</a>
     </td>
-    <td align="center">
-      <img src="images/sladjana.png" width="120" height="120" style="border-radius: 50%; border: none;"><br/>
+    <td align="center" valign="top">
+      <img src="images/sladjana.png" width="120" height="120"><br/>
       <strong>Slađana Petrović</strong><br/>
       <a href="mailto:sladjana.petrovic1@student.um.si">sladjana.petrovic1@student.um.si</a>
     </td>
-    <td align="center">
-      <img src="images/vedran.png" width="120" height="120" style="border-radius: 50%; border: none;"><br/>
+    <td align="center" valign="top">
+      <img src="images/vedran.png" width="120" height="120"><br/>
       <strong>Vedran Dojčinović</strong><br/>
       <a href="mailto:vedran.dojcinovic@student.um.si">vedran.dojcinovic@student.um.si</a>
     </td>
   </tr>
 </table>
+
 
 
   
