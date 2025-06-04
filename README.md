@@ -78,5 +78,5 @@ This project aims to build a real-time driver fatigue detection system that moni
 
 ---
 
-## 📦 Project Structure
+## 📦 Manual
 
