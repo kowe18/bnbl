@@ -25,7 +25,7 @@ We are a team of students of Faculty of Electrical Engineering and Computer Scie
 
 # 🧠 Driver Fatigue Detection System
 
-A real-time computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning — before it's too late.
+A real-time and trained computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning — before it's too late. By identifying signs of drowsiness early (e.g., head drooping, closed eyes, yawning), these systems can prevent accidents before they happen, alerting the driver or triggering automated responses.
 
 ---
 
