@@ -11,12 +11,12 @@ We are a team of students of Faculty of Electrical Engineering and Computer Scie
       <a href="mailto:milos.avakumovic@student.um.si">milos.avakumovic@student.um.si</a>
     </td>
     <td align="center">
-      <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
+      <img src="images/sladjana.jpg" width="120" style="border-radius: 50%"><br/>
       <strong>Slađana Petrović</strong><br/
-      <a href="mailto:sladjna.petrovic1@student.um.si">sladjna.petrovic1@student.um.si</a>
+      <a href="mailto:sladjana.petrovic1@student.um.si">sladjna.petrovic1@student.um.si</a>
     </td>
    <td align="center">
-      <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
+      <img src="images/vedran.jpg" width="120" style="border-radius: 50%"><br/>
       <strong>Vedran Dojčinović</strong><br/>
       <a href="mailto:vedran.dojcinovic@student.um.si">vedran.dojcinovic@student.um.si</a>
     </td>
