@@ -1,5 +1,34 @@
 # bnbl
- 
+ # 👥 Meet the Team
+
+We are a team of passionate students and researchers working on intelligent driver monitoring systems. Below are the mentors and contributors who helped shape this project.
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="images/mladen.jpg" width="120" style="border-radius: 50%"><br/>
+      <strong>asist. dr. Mladen Borovič</strong><br/>
+      <sub>mag. inž. rač. in inf. tehnol.</sub><br/>
+      Room: G2-2N.43<br/>
+      <a href="mailto:mladen.borovic@um.si">mladen.borovic@um.si</a>
+    </td>
+    <td align="center">
+      <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
+      <strong>asist. Luka Lukač</strong><br/>
+      <sub>mag. inž. rač. in inf. tehnol.</sub><br/>
+      Room: G2-2N.12 (Farad Lab)<br/>
+      <a href="mailto:luka.lukac@um.si">luka.lukac@um.si</a>
+    </td>
+   <td align="center">
+      <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
+      <strong>asist. Luka Lukač</strong><br/>
+      <sub>mag. inž. rač. in inf. tehnol.</sub><br/>
+      Room: G2-2N.12 (Farad Lab)<br/>
+      <a href="mailto:luka.lukac@um.si">luka.lukac@um.si</a>
+    </td>
+  </tr>
+</table>
+
 # 🧠 Driver Fatigue Detection System
 
 A real-time computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning — before it's too late.
