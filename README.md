@@ -13,7 +13,7 @@ We are a team of students of Faculty of Electrical Engineering and Computer Scie
     <td align="center">
       <img src="images/sladjana.jpg" width="120" style="border-radius: 50%"><br/>
       <strong>Slađana Petrović</strong><br/
-      <a href="mailto:sladjana.petrovic1@student.um.si">sladjna.petrovic1@student.um.si</a>
+      <a href="mailto:sladjana.petrovic1@student.um.si">sladjana.petrovic1@student.um.si</a>
     </td>
    <td align="center">
       <img src="images/vedran.jpg" width="120" style="border-radius: 50%"><br/>
