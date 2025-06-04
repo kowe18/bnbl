@@ -2,7 +2,7 @@
  # 👥 Meet the Team
 
 We are a team of students of Faculty of Electrical Engineering and Computer Science (UM FERI) in Maribor, Slovenia. We are researchers working on intelligent driver monitoring systems, as a project. Below are the members and contributors who helped shape this project.
-<table>
+<table border="0">
   <tr>
     <td align="center" valign="top">
       <img src="images/milos.png" width="120" height="120"><br/>
