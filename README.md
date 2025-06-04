@@ -1,30 +1,24 @@
 # bnbl
  # 👥 Meet the Team
 
-We are a team of passionate students and researchers working on intelligent driver monitoring systems. Below are the mentors and contributors who helped shape this project.
+We are a team of students of Faculty of Electrical Engineering and Computer Science (UM FERI) in Maribor, Slovenia. We are researchers working on intelligent driver monitoring systems, as a project. Below are the members and contributors who helped shape this project.
 
 <table>
   <tr>
     <td align="center">
-      <img src="images/mladen.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. dr. Mladen Borovič</strong><br/>
-      <sub>mag. inž. rač. in inf. tehnol.</sub><br/>
-      Room: G2-2N.43<br/>
-      <a href="mailto:mladen.borovic@um.si">mladen.borovic@um.si</a>
+      <img src="images/milos.jpg" width="120" style="border-radius: 50%"><br/>
+      <strong>asist. Miloš Avakumović</strong><br/>
+      <a href="mailto:milos.avakumovic@student.um.si">milos.avakumovic@student.um.si</a>
     </td>
     <td align="center">
       <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Luka Lukač</strong><br/>
-      <sub>mag. inž. rač. in inf. tehnol.</sub><br/>
-      Room: G2-2N.12 (Farad Lab)<br/>
-      <a href="mailto:luka.lukac@um.si">luka.lukac@um.si</a>
+      <strong>asist. Slađana Petrović</strong><br/
+      <a href="mailto:sladjana.petrovic1@student.um.si"></a>
     </td>
    <td align="center">
       <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Luka Lukač</strong><br/>
-      <sub>mag. inž. rač. in inf. tehnol.</sub><br/>
-      Room: G2-2N.12 (Farad Lab)<br/>
-      <a href="mailto:luka.lukac@um.si">luka.lukac@um.si</a>
+      <strong>asist. Vedran Dojčinović</strong><br/>
+      <a href="mailto:vedran.dojcinovic@student.um.si</a>
     </td>
   </tr>
 </table>
