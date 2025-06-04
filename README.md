@@ -7,18 +7,18 @@ We are a team of students of Faculty of Electrical Engineering and Computer Scie
   <tr>
     <td align="center">
       <img src="images/milos.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Miloš Avakumović</strong><br/>
+      <strong>Miloš Avakumović</strong><br/>
       <a href="mailto:milos.avakumovic@student.um.si">milos.avakumovic@student.um.si</a>
     </td>
     <td align="center">
       <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Slađana Petrović</strong><br/
-      <a href="mailto:sladjana.petrovic1@student.um.si"></a>
+      <strong>Slađana Petrović</strong><br/
+      <a href="mailto:sladjna.petrovic1@student.um.si">sladjna.petrovic1@student.um.si</a>
     </td>
    <td align="center">
       <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Vedran Dojčinović</strong><br/>
-      <a href="mailto:vedran.dojcinovic@student.um.si</a>
+      <strong>Vedran Dojčinović</strong><br/>
+      <a href="mailto:vedran.dojcinovic@student.um.si">vedran.dojcinovic@student.um.si</a>
     </td>
   </tr>
 </table>
