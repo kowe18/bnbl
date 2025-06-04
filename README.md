@@ -28,15 +28,15 @@ We are a team of students of Faculty of Electrical Engineering and Computer Scie
 
 # 🧠 Driver Fatigue Detection System
 
-A real-time and trained computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning — before it's too late. By identifying signs of drowsiness early (e.g., head drooping, closed eyes, yawning), these systems can prevent accidents before they happen, alerting the driver or triggering automated responses.
+A real-time and trained computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning, before it becomes dangerous. By identifying signs of drowsiness early (e.g., head drooping, closed eyes, yawning), these systems can prevent accidents before they happen, alerting the driver or triggering automated responses.
 
 ---
 
 ## 🚗 About the Project
 
-Driver fatigue is one of the most significant — yet preventable — contributors to road accidents worldwide. It impairs reaction time, decision-making ability, and overall driving performance. Studies show that drowsy driving can be as dangerous as driving under the influence of alcohol, with thousands of accidents and fatalities each year attributed to tired drivers.
+Driver fatigue is one of the most significant contributors to road accidents worldwide. It impairs reaction time, decision-making ability, and overall driving performance. Studies show that drowsy driving can be as dangerous as driving under the influence of alcohol, with thousands of accidents and fatalities each year attributed to tired drivers.
 
-This project aims to build a real-time driver fatigue detection system that monitors visual cues on the driver's face to recognize early signs of drowsiness or reduced attention. By analyzing the position and behavior of key facial landmarks — such as eye closure, yawning, and head movement — the system is capable of issuing timely warnings before the driver’s condition becomes dangerous.
+This project aims to build a real-time driver fatigue detection system that monitors visual cues on the driver's face to recognize early signs of drowsiness or reduced attention. By analyzing the position and behavior of key facial landmarks — such as eye closure, yawning, and head movement - the system is capable of issuing timely warnings before the driver’s condition becomes dangerous.
 
 ---
 
@@ -50,6 +50,9 @@ This project aims to build a real-time driver fatigue detection system that moni
 
 - 📉 **Drowsiness Detection Logic**  
   Rule-based logic using angles, facial movement thresholds, and landmark shifts.
+
+- 🧩 **Multi-Modal Vectorization Model**
+  Collect, normalize, and structure the outputs from different subsystems into a single feature vector per frame.
 
 - 🖥️ **Live GUI Visualization**  
   Real-time status display showing fatigue detection overlays and alerts.
