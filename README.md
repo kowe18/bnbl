@@ -7,25 +7,25 @@ We are a team of students of Faculty of Electrical Engineering and Computer Scie
   <tr>
     <td align="center">
       <img src="images/milos.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Miloš Avakumović</strong><br/>
+      <strong>Miloš Avakumović</strong><br/>
       <a href="mailto:milos.avakumovic@student.um.si">milos.avakumovic@student.um.si</a>
     </td>
     <td align="center">
-      <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Slađana Petrović</strong><br/
-      <a href="mailto:sladjana.petrovic1@student.um.si"></a>
+      <img src="images/sladjana.jpg" width="120" style="border-radius: 50%"><br/>
+      <strong>Slađana Petrović</strong><br>
+      <a href="mailto:sladjana.petrovic1@student.um.si">sladjana.petrovic1@student.um.si</a>
     </td>
    <td align="center">
-      <img src="images/luka.jpg" width="120" style="border-radius: 50%"><br/>
-      <strong>asist. Vedran Dojčinović</strong><br/>
-      <a href="mailto:vedran.dojcinovic@student.um.si</a>
+      <img src="images/vedran.jpg" width="120" style="border-radius: 50%"><br/>
+      <strong>Vedran Dojčinović</strong><br/>
+      <a href="mailto:vedran.dojcinovic@student.um.si">vedran.dojcinovic@student.um.si</a>
     </td>
   </tr>
 </table>
 
 # 🧠 Driver Fatigue Detection System
 
-A real-time computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning — before it's too late.
+A real-time and trained computer vision system that detects signs of driver drowsiness using AI-powered facial analysis. Combining facial landmark tracking with neural object detection, our solution increases road safety by identifying head tilts, closed eyes, and yawning — before it's too late. By identifying signs of drowsiness early (e.g., head drooping, closed eyes, yawning), these systems can prevent accidents before they happen, alerting the driver or triggering automated responses.
 
 ---
 
