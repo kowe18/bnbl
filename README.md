@@ -36,7 +36,7 @@ A real-time and trained computer vision system that detects signs of driver drow
 
 Driver fatigue is one of the most significant contributors to road accidents worldwide. It impairs reaction time, decision-making ability, and overall driving performance. Studies show that drowsy driving can be as dangerous as driving under the influence of alcohol, with thousands of accidents and fatalities each year attributed to tired drivers.
 
-This project aims to build a real-time driver fatigue detection system that monitors visual cues on the driver's face to recognize early signs of drowsiness or reduced attention. By analyzing the position and behavior of key facial landmarks — such as eye closure, yawning, and head movement - the system is capable of issuing timely warnings before the driver’s condition becomes dangerous.
+This project aims to build a real-time driver fatigue detection system that monitors visual cues on the driver's face to recognize early signs of drowsiness or reduced attention. By analyzing the position and behavior of key facial landmarks as eye closure, yawning, and head movement - the system is capable of issuing timely warnings before the driver’s condition becomes dangerous.
 
 ---
 
@@ -72,7 +72,7 @@ This project aims to build a real-time driver fatigue detection system that moni
 | Neural Detection | YOLOv8 (Ultralytics)      |
 | Landmark Tracking| MediaPipe FaceMesh        |
 | GUI              | OpenCV + Tkinter          |
-| Communication    | MQTT (Mosquitto + paho)   |
+| Communication    | MQTT (Mosquitto)   |
 | Metrics          | Prometheus + Grafana      |
 | VPN              | ZeroTier                  |
 
