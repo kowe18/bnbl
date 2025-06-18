@@ -76,10 +76,10 @@ def save_pred_video(video_path: str,
         cv2.putText(frame, f"p_u={p_u:.2f} p_s={p_s:.2f}", (20, 35),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
         if state == "MILD":
-            cv2.putText(frame, "🟡 UMORAN – srednji alarm", (20, 75),
+            cv2.putText(frame, "🟡 UTRUJEN – srednji alarm", (20, 75),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255), 3)
         elif state == "STRONG":
-            cv2.putText(frame, "🔴 USPAVAN – ALARM!", (20, 75),
+            cv2.putText(frame, "🔴 ZASPAN – ALARM!", (20, 75),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,0,255), 3)
         else:
             cv2.putText(frame, "OK", (20, 75),
