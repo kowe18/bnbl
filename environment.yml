@@ -1,4 +1,4 @@
-name: fatigue-detector
+name: bnbl-fatigue-detector
 channels:
   - defaults
   - conda-forge
