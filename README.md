@@ -105,15 +105,15 @@ This project aims to build a real-time driver fatigue detection system that moni
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/fatigue-detector.git
-cd fatigue-detector
+git clone https://github.com/your-username/bnbl-fatigue-detector.git
+cd bnbl-fatigue-detector
 ```
 
 ### 2. Create and activate environment
 
 ```bash
 conda env create -f environment.yml
-conda activate fatigue-detector
+conda activate bnbl-fatigue-detector
 ```
 
 ### 3. Launch the application
