@@ -1,0 +1,12 @@
+path: D:\semester4\projektnipraktikum\model_1\model1.2
+train: images/train
+val: images/train
+
+names:
+  0: Left_Eye
+  1: Right_Eye
+  2: Mouth
+  3: Head_Line
+  4: Closed_Left
+  5: Closed_Right
+  6: Open_Mouth
