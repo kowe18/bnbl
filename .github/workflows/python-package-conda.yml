@@ -1,4 +1,4 @@
-name: CI - Fatigue Detector
+name: CI Fatigue Detector
 
 on:
   push:
@@ -16,14 +16,16 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          activate-environment: fatigue-detector
+          auto-activate-base: false
           python-version: 3.10
 
-      - name: Create environment from file
-        shell: bash -l {0}
-        run: conda env create -f environment.yml
+      - name: Remove previous environment (if exists)
+        run: conda env remove --name fatigue-detector || true
 
-      - name: Test GUI import
+      - name: Create environment
+        run: conda env create --name fatigue-detector -f environment.yml
+
+      - name: Test GUI launch
         shell: bash -l {0}
         run: |
           conda activate fatigue-detector
