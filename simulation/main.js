@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
+import { Sky } from "three/addons/objects/Sky.js";
+
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -42,6 +44,29 @@ controls.update();
 window.camera = camera;
 window.controls = controls;
 
+const sky = new Sky();
+sky.scale.setScalar(300);
+scene.add(sky);
+
+const skyUniforms = sky.material.uniforms;
+
+skyUniforms.turbidity.value = 8;
+skyUniforms.rayleigh.value = 2;
+skyUniforms.mieCoefficient.value = 0.005;
+skyUniforms.mieDirectionalG.value = 0.8;
+
+
+const sun = new THREE.Vector3();
+sun.setFromSphericalCoords(
+  1,
+  THREE.MathUtils.degToRad(90),
+  THREE.MathUtils.degToRad(120)
+);
+
+skyUniforms.sunPosition.value.copy(sun);
+
+
+
 
 function loadObjMtl(basePath, objFile, mtlFile) {
   return new Promise((resolve, reject) => {
@@ -70,6 +95,8 @@ function loadObjMtl(basePath, objFile, mtlFile) {
 
 async function init() {
   try {
+
+    // notranjost avta - Nejla Perenda
     const cabinObj = await loadObjMtl(
       "/models/cabin/",
       "rac_grafika_model_armatura2.obj",
@@ -77,22 +104,47 @@ async function init() {
     );
     scene.add(cabinObj);
 
-    const cameraObj = await loadObjMtl(
+    // control unit - Milos Avakumovic
+    const controlBoxObj = await loadObjMtl(
       "/models/control_box/",
       "model_1.obj",
       "model_1.mtl"
     );
-    cabinObj.add(cameraObj);
+    cabinObj.add(controlBoxObj);
 
-    cameraObj.position.set(2.9, -1.42, -1.7);
-    cameraObj.rotation.set(0, Math.PI, 0); 
-    cameraObj.scale.setScalar(2);
+    controlBoxObj.position.set(2.9, -1.42, -1.7);
+    controlBoxObj.rotation.set(0, Math.PI, 0); 
+    controlBoxObj.scale.setScalar(2);
+
+    // camera - Vedran Dojcinovic
+    const cameraModelObj = await loadObjMtl(
+      "/models/camera/",
+      "bnbl_camera.obj",
+      "bnbl_camera.mtl"
+    );
+    cabinObj.add(cameraModelObj);
+    cameraModelObj.position.set(1.88, 1.67, -0.5);
+    cameraModelObj.rotation.set(0, 10, 0);
+    cameraModelObj.scale.setScalar(0.1);
+
+    // camera stand - Sladjana Petrovic
+    const standObj = await loadObjMtl(
+      "/models/stand/",
+      "proj.obj",
+      "proj.mtl"
+    );
+    cabinObj.add(standObj);
+    standObj.position.set(1.33, 1.9, -0.6);
+    standObj.rotation.set(0, 0, 0.9);
+    standObj.scale.setScalar(1.3);    
 
 
   } catch (e) {
     console.error("Load error:", e);
   }
 }
+
+
 
 init();
 
