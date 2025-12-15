@@ -1,23 +1,107 @@
-import * as THREE from 'three';
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+scene.background = new THREE.Color(0xFFFFFF);
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  5000
+);
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
+camera.position.set(
+    -0.18899407746813313, 
+    2.4427262921372375, 
+    -1.120140483793434
+);
 
-camera.position.z = 5;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.style.margin = "0";
+document.body.appendChild(renderer.domElement);
 
-function animate() {
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  renderer.render( scene, camera );
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+dir.position.set(5, 10, 5);
+scene.add(dir);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+
+controls.target.set(
+  1.2033503249851856,
+  1.9279949403548189,
+  -1.097272302029383
+);
+
+controls.update();
+
+window.camera = camera;
+window.controls = controls;
+
+
+function loadObjMtl(basePath, objFile, mtlFile) {
+  return new Promise((resolve, reject) => {
+    const mtlLoader = new MTLLoader().setPath(basePath);
+    mtlLoader.load(
+      mtlFile,
+      (materials) => {
+        materials.preload();
+        const objLoader = new OBJLoader()
+          .setMaterials(materials)
+          .setPath(basePath);
+
+        objLoader.load(
+          objFile,
+          (obj) => resolve(obj),
+          undefined,
+          (err) => reject(err)
+        );
+      },
+      undefined,
+      (err) => reject(err)
+    );
+  });
 }
-renderer.setAnimationLoop( animate );
 
+
+async function init() {
+  try {
+    const cabinObj = await loadObjMtl(
+      "/models/cabin/",
+      "rac_grafika_model_armatura2.obj",
+      "rac_grafika_model_armatura2.mtl"
+    );
+    scene.add(cabinObj);
+
+    const cameraObj = await loadObjMtl(
+      "/models/control_box/",
+      "model_1.obj",
+      "model_1.mtl"
+    );
+    cabinObj.add(cameraObj);
+
+    cameraObj.position.set(2.9, -1.42, -1.7);
+    cameraObj.rotation.set(0, Math.PI, 0); 
+    cameraObj.scale.setScalar(2);
+
+
+  } catch (e) {
+    console.error("Load error:", e);
+  }
+}
+
+init();
+
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+renderer.setAnimationLoop(() => {
+  renderer.render(scene, camera);
+});
