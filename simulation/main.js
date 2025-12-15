@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { Sky } from "three/addons/objects/Sky.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 
 const scene = new THREE.Scene();
@@ -59,12 +60,23 @@ skyUniforms.mieDirectionalG.value = 0.8;
 const sun = new THREE.Vector3();
 sun.setFromSphericalCoords(
   1,
-  THREE.MathUtils.degToRad(90),
-  THREE.MathUtils.degToRad(120)
+  THREE.MathUtils.degToRad(91),
+  THREE.MathUtils.degToRad(100)
 );
 
 skyUniforms.sunPosition.value.copy(sun);
 
+function loadGLB(path) {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader();
+    loader.load(
+      path,
+      (gltf) => resolve(gltf.scene),
+      undefined,
+      (err) => reject(err)
+    );
+  });
+}
 
 
 
@@ -138,6 +150,14 @@ async function init() {
     standObj.rotation.set(0, 0, 0.9);
     standObj.scale.setScalar(1.3);    
 
+    // mesto - Elbolillo (https://www.fab.com/sellers/Elbolillo)
+    const busStop = await loadGLB("/models/city/bus_stop.glb");
+    scene.add(busStop);
+
+    busStop.position.set(0, -1.5, 28);
+    busStop.rotation.set(0, 0, 0);
+    busStop.scale.setScalar(1.7);
+
 
   } catch (e) {
     console.error("Load error:", e);
@@ -145,6 +165,9 @@ async function init() {
 }
 
 
+controls.enableRotate = true;
+controls.enableZoom = true;
+controls.enablePan = true;
 
 init();
 
