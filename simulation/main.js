@@ -10,17 +10,28 @@ import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { createDriverIndicators } from "./src/interaction/driverIndicators.js";
 import { attachStateInputDemo } from "./src/interaction/stateInputDemo.js";
 
-
-console.log("MAIN LOADED ✅", new Date().toISOString());
-
-// Loading manager for progress tracking
 const loadingManager = new THREE.LoadingManager();
 const progressBar = document.getElementById('progress-fill');
 const loadingText = document.getElementById('loading-text');
 const loadingScreen = document.getElementById('loading-screen');
 
+let controlBoxObj = null;
+let indicators = null;
 let itemsLoaded = 0;
 let itemsTotal = 0;
+
+const clock = new THREE.Clock();
+const mixers = [];
+const birds = [];
+
+const birdsMotion = {
+  zMin: -80,
+  zMax:  80,
+  speed: 5,
+  x: 70,
+  y: 20
+};
+
 
 loadingManager.onStart = (url, loaded, total) => {
   itemsTotal = total;
@@ -235,6 +246,13 @@ function loadGLB(path) {
   });
 }
 
+function loadGLTF(path) {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader(loadingManager);
+    loader.load(path, (gltf) => resolve(gltf), undefined, (err) => reject(err));
+  });
+}
+
 
 
 function loadObjMtl(basePath, objFile, mtlFile) {
@@ -274,21 +292,80 @@ async function init() {
     scene.add(cabinObj);
 
     // control unit - Milos Avakumovic
-    const controlBoxObj = await loadObjMtl(
+    controlBoxObj = await loadObjMtl(
       "/models/control_box/",
       "model_1.obj",
       "model_1.mtl"
     );
     cabinObj.add(controlBoxObj);
-    controlBoxObj.traverse((o) => {
-  if (o.isMesh) console.log("MESH NAME:", o.name);
-});
+    controlBoxObj.position.set(2.9, -1.42, -1.7);
+    controlBoxObj.rotation.set(0, Math.PI, 0); 
+    controlBoxObj.scale.setScalar(2);
 
+    // camera - Vedran Dojcinovic
+    const cameraModelObj = await loadObjMtl(
+      "/models/camera/",
+      "bnbl_camera.obj",
+      "bnbl_camera.mtl"
+    );
+    cabinObj.add(cameraModelObj);
+    cameraModelObj.position.set(1.88, 1.67, -0.5);
+    cameraModelObj.rotation.set(0, 10, 0);
+    cameraModelObj.scale.setScalar(0.1);
 
-const indicators = createDriverIndicators(controlBoxObj, {
-  screenName: "Ekran_Material.004",
-  lampName: "LED_trak_LED_bar",
-});
+    // camera stand - Sladjana Petrovic
+    const standObj = await loadObjMtl(
+      "/models/stand/",
+      "proj.obj",
+      "proj.mtl"
+    );
+    cabinObj.add(standObj);
+    standObj.position.set(1.33, 1.9, -0.6);
+    standObj.rotation.set(0, 0, 0.9);
+    standObj.scale.setScalar(1.3);    
+
+    // mesto - Elbolillo (https://www.fab.com/sellers/Elbolillo)
+    const busStop = await loadGLB("/models/city/bus_stop.glb");
+    scene.add(busStop);
+
+    busStop.position.set(0, -1.5, 28);
+    busStop.rotation.set(0, 0, 0);
+    busStop.scale.setScalar(1.7);
+
+    // roke - DJMaesen
+    const arms = await loadGLB("/models/arms/cartoon_fps_arms.glb");
+    scene.add(arms);
+
+    arms.position.set(0.67, 1.7, -1.1);
+    arms.rotation.set(0, 1.5, 0);
+    arms.scale.setScalar(0.0015);
+
+    // ptice - https://sketchfab.com/moizmuhammad373
+    const birdsGltf = await loadGLTF("/models/birds/bird.glb");
+    const flock = birdsGltf.scene;
+    scene.add(flock);
+
+    flock.position.set(0, 25, 0);
+    flock.scale.setScalar(3);
+    flock.rotation.set(0, 0, 0);
+
+    if (birdsGltf.animations && birdsGltf.animations.length > 0) {
+      const mixer = new THREE.AnimationMixer(flock);
+      mixer.clipAction(birdsGltf.animations[0]).play();
+      mixers.push(mixer);
+    }
+    birds.push(flock);
+
+    
+    indicators = createDriverIndicators(controlBoxObj, {
+    screenName: "Ekran_Material.004",
+    lampName: "LED_trak_LED_bar",
+    });
+
+  } catch (e) {
+    console.error("Load error:", e);
+  }
+}
 
 // WebSocket real-time data iz Dockera
 const connectionStatus = document.getElementById('connection-status');
@@ -342,47 +419,6 @@ connectWebSocket();
 
 
 
-    controlBoxObj.position.set(2.9, -1.42, -1.7);
-    controlBoxObj.rotation.set(0, Math.PI, 0); 
-    controlBoxObj.scale.setScalar(2);
-
-    // camera - Vedran Dojcinovic
-    const cameraModelObj = await loadObjMtl(
-      "/models/camera/",
-      "bnbl_camera.obj",
-      "bnbl_camera.mtl"
-    );
-    cabinObj.add(cameraModelObj);
-    cameraModelObj.position.set(1.88, 1.67, -0.5);
-    cameraModelObj.rotation.set(0, 10, 0);
-    cameraModelObj.scale.setScalar(0.1);
-
-    // camera stand - Sladjana Petrovic
-    const standObj = await loadObjMtl(
-      "/models/stand/",
-      "proj.obj",
-      "proj.mtl"
-    );
-    cabinObj.add(standObj);
-    standObj.position.set(1.33, 1.9, -0.6);
-    standObj.rotation.set(0, 0, 0.9);
-    standObj.scale.setScalar(1.3);    
-
-    // mesto - Elbolillo (https://www.fab.com/sellers/Elbolillo)
-    const busStop = await loadGLB("/models/city/bus_stop.glb");
-    scene.add(busStop);
-
-    busStop.position.set(0, -1.5, 28);
-    busStop.rotation.set(0, 0, 0);
-    busStop.scale.setScalar(1.7);
-
-
-  } catch (e) {
-    console.error("Load error:", e);
-  }
-}
-
-
 controls.enableRotate = true;
 controls.enableZoom = true;
 controls.enablePan = true;
@@ -396,6 +432,25 @@ window.addEventListener("resize", () => {
 });
 
 renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+
+  for (const m of mixers) m.update(dt);
+
+  for (const b of birds) {
+    b.position.x = birdsMotion.x;
+    b.position.y = birdsMotion.y;
+
+    b.position.z -= birdsMotion.speed * dt;
+
+    if (b.position.z <= birdsMotion.zMin) {
+      b.position.z = birdsMotion.zMax;
+    }
+
+    b.rotation.y = Math.PI;
+  }
+
   stats.update();
   renderer.render(scene, camera);
 });
+
+
