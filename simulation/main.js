@@ -5,6 +5,11 @@ import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { Sky } from "three/addons/objects/Sky.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+import { createDriverIndicators } from "./src/interaction/driverIndicators.js";
+import { attachStateInputDemo } from "./src/interaction/stateInputDemo.js";
+
+
+console.log("MAIN LOADED ✅", new Date().toISOString());
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -123,6 +128,37 @@ async function init() {
       "model_1.mtl"
     );
     cabinObj.add(controlBoxObj);
+    controlBoxObj.traverse((o) => {
+  if (o.isMesh) console.log("MESH NAME:", o.name);
+});
+
+
+const indicators = createDriverIndicators(controlBoxObj, {
+  screenName: "Ekran_Material.004",
+  lampName: "LED_trak_LED_bar",
+});
+
+// WebSocket real-timr data iz Dockera
+const ws = new WebSocket("ws://172.25.86.22:3001");
+
+ws.onopen = () => console.log("WS OPEN");
+ws.onerror = (e) => console.log("WS ERROR", e);
+ws.onclose = () => console.log("WS CLOSE");
+
+// Prihaja JSON: {"status_code":"10"}
+ws.onmessage = (e) => {
+  try {
+    const msg = JSON.parse(e.data);
+    const code = String(msg.status_code).trim(); // "00"/"01"/"10"
+    indicators.applyDriverState(code);
+  } catch (err) {
+    console.warn("Bad WS message:", e.data, err);
+  }
+};
+
+// attachStateInputDemo((code) => indicators.applyDriverState(code));
+
+
 
     controlBoxObj.position.set(2.9, -1.42, -1.7);
     controlBoxObj.rotation.set(0, Math.PI, 0); 
