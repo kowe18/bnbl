@@ -4,12 +4,48 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { Sky } from "three/addons/objects/Sky.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import Stats from "three/addons/libs/stats.module.js";
+import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 
 import { createDriverIndicators } from "./src/interaction/driverIndicators.js";
 import { attachStateInputDemo } from "./src/interaction/stateInputDemo.js";
 
 
 console.log("MAIN LOADED ✅", new Date().toISOString());
+
+// Loading manager for progress tracking
+const loadingManager = new THREE.LoadingManager();
+const progressBar = document.getElementById('progress-fill');
+const loadingText = document.getElementById('loading-text');
+const loadingScreen = document.getElementById('loading-screen');
+
+let itemsLoaded = 0;
+let itemsTotal = 0;
+
+loadingManager.onStart = (url, loaded, total) => {
+  itemsTotal = total;
+  console.log(`Loading started: ${loaded}/${total}`);
+};
+
+loadingManager.onProgress = (url, loaded, total) => {
+  itemsLoaded = loaded;
+  const progress = (loaded / total) * 100;
+  progressBar.style.width = progress + '%';
+  loadingText.textContent = `Loading models... ${loaded}/${total}`;
+};
+
+loadingManager.onLoad = () => {
+  console.log('All models loaded!');
+  loadingText.textContent = 'Complete!';
+  setTimeout(() => {
+    loadingScreen.classList.add('hidden');
+  }, 500);
+};
+
+loadingManager.onError = (url) => {
+  console.error('Error loading:', url);
+  loadingText.textContent = 'Error loading models';
+};
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -29,12 +65,26 @@ camera.position.set(
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.style.margin = "0";
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+// Stats monitor (FPS counter)
+const stats = new Stats();
+stats.dom.style.position = 'fixed';
+stats.dom.style.bottom = '0px';
+stats.dom.style.top = 'auto';
+document.body.appendChild(stats.dom);
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambientLight);
+
 const dir = new THREE.DirectionalLight(0xffffff, 1.0);
 dir.position.set(5, 10, 5);
+dir.castShadow = true;
+dir.shadow.mapSize.width = 2048;
+dir.shadow.mapSize.height = 2048;
 scene.add(dir);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -71,9 +121,111 @@ sun.setFromSphericalCoords(
 
 skyUniforms.sunPosition.value.copy(sun);
 
+// GUI Controls
+const gui = new GUI();
+gui.title('Scene Controls');
+
+const lightingFolder = gui.addFolder('Lighting');
+lightingFolder.add(ambientLight, 'intensity', 0, 2, 0.1).name('Ambient Light');
+lightingFolder.add(dir, 'intensity', 0, 3, 0.1).name('Directional Light');
+
+const skyFolder = gui.addFolder('Sky');
+skyFolder.add(skyUniforms.turbidity, 'value', 0, 20, 0.1).name('Turbidity');
+skyFolder.add(skyUniforms.rayleigh, 'value', 0, 4, 0.1).name('Rayleigh');
+skyFolder.add(skyUniforms.mieCoefficient, 'value', 0, 0.1, 0.001).name('Mie Coefficient');
+
+const cameraFolder = gui.addFolder('Camera');
+const cameraPresets = {
+  'Driver View': () => {
+    animateCamera(
+      new THREE.Vector3(-0.18899407746813313, 2.4427262921372375, -1.120140483793434),
+      new THREE.Vector3(1.2033503249851856, 1.9279949403548189, -1.097272302029383)
+    );
+  },
+  'Exterior View': () => {
+    animateCamera(
+      new THREE.Vector3(-5, 3, 5),
+      new THREE.Vector3(0, 0, 0)
+    );
+  },
+  'Top View': () => {
+    animateCamera(
+      new THREE.Vector3(0, 10, 0),
+      new THREE.Vector3(0, 0, 0)
+    );
+  }
+};
+cameraFolder.add(cameraPresets, 'Driver View');
+cameraFolder.add(cameraPresets, 'Exterior View');
+cameraFolder.add(cameraPresets, 'Top View');
+
+// Raycaster for click interactions
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const infoPanel = document.getElementById('info-panel');
+const infoContent = document.getElementById('info-content');
+
+function onMouseClick(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  if (intersects.length > 0) {
+    const object = intersects[0].object;
+    showObjectInfo(object);
+  } else {
+    infoPanel.classList.remove('visible');
+  }
+}
+
+function showObjectInfo(object) {
+  let info = `<strong>Name:</strong> ${object.name || 'Unnamed'}<br>`;
+  info += `<strong>Type:</strong> ${object.type}<br>`;
+  info += `<strong>Position:</strong> (${object.position.x.toFixed(2)}, ${object.position.y.toFixed(2)}, ${object.position.z.toFixed(2)})<br>`;
+  
+  if (object.material) {
+    info += `<strong>Material:</strong> ${object.material.name || 'Default'}<br>`;
+  }
+  
+  infoContent.innerHTML = info;
+  infoPanel.classList.add('visible');
+}
+
+window.addEventListener('click', onMouseClick);
+
+// Smooth camera animation
+function animateCamera(targetPosition, targetLookAt) {
+  const startPos = camera.position.clone();
+  const startTarget = controls.target.clone();
+  const duration = 1500;
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeInOutCubic(progress);
+
+    camera.position.lerpVectors(startPos, targetPosition, eased);
+    controls.target.lerpVectors(startTarget, targetLookAt, eased);
+    controls.update();
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 function loadGLB(path) {
   return new Promise((resolve, reject) => {
-    const loader = new GLTFLoader();
+    const loader = new GLTFLoader(loadingManager);
     loader.load(
       path,
       (gltf) => resolve(gltf.scene),
@@ -87,12 +239,12 @@ function loadGLB(path) {
 
 function loadObjMtl(basePath, objFile, mtlFile) {
   return new Promise((resolve, reject) => {
-    const mtlLoader = new MTLLoader().setPath(basePath);
+    const mtlLoader = new MTLLoader(loadingManager).setPath(basePath);
     mtlLoader.load(
       mtlFile,
       (materials) => {
         materials.preload();
-        const objLoader = new OBJLoader()
+        const objLoader = new OBJLoader(loadingManager)
           .setMaterials(materials)
           .setPath(basePath);
 
@@ -138,23 +290,53 @@ const indicators = createDriverIndicators(controlBoxObj, {
   lampName: "LED_trak_LED_bar",
 });
 
-// WebSocket real-timr data iz Dockera
-const ws = new WebSocket("ws://172.25.86.22:3001");
+// WebSocket real-time data iz Dockera
+const connectionStatus = document.getElementById('connection-status');
+let ws;
 
-ws.onopen = () => console.log("WS OPEN");
-ws.onerror = (e) => console.log("WS ERROR", e);
-ws.onclose = () => console.log("WS CLOSE");
-
-// Prihaja JSON: {"status_code":"10"}
-ws.onmessage = (e) => {
+function connectWebSocket() {
   try {
-    const msg = JSON.parse(e.data);
-    const code = String(msg.status_code).trim(); // "00"/"01"/"10"
-    indicators.applyDriverState(code);
+    ws = new WebSocket("ws://172.25.86.22:3001");
+
+    ws.onopen = () => {
+      console.log("WS OPEN");
+      connectionStatus.textContent = "WebSocket: Connected";
+      connectionStatus.className = "status-connected";
+    };
+
+    ws.onerror = (e) => {
+      console.log("WS ERROR", e);
+      connectionStatus.textContent = "WebSocket: Error";
+      connectionStatus.className = "status-disconnected";
+    };
+
+    ws.onclose = () => {
+      console.log("WS CLOSE");
+      connectionStatus.textContent = "WebSocket: Disconnected";
+      connectionStatus.className = "status-disconnected";
+      
+      // Attempt reconnection after 5 seconds
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    // Prihaja JSON: {"status_code":"10"}
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        const code = String(msg.status_code).trim(); // "00"/"01"/"10"
+        indicators.applyDriverState(code);
+      } catch (err) {
+        console.warn("Bad WS message:", e.data, err);
+      }
+    };
   } catch (err) {
-    console.warn("Bad WS message:", e.data, err);
+    console.error("WebSocket connection failed:", err);
+    connectionStatus.textContent = "WebSocket: Failed";
+    connectionStatus.className = "status-disconnected";
   }
-};
+}
+
+connectWebSocket();
 
 // attachStateInputDemo((code) => indicators.applyDriverState(code));
 
@@ -214,5 +396,6 @@ window.addEventListener("resize", () => {
 });
 
 renderer.setAnimationLoop(() => {
+  stats.update();
   renderer.render(scene, camera);
 });
