@@ -415,7 +415,7 @@ function connectWebSocket() {
 
 connectWebSocket();
 
-// attachStateInputDemo((code) => indicators.applyDriverState(code));
+attachStateInputDemo((code) => indicators.applyDriverState(code));
 
 
 
@@ -440,10 +440,10 @@ renderer.setAnimationLoop(() => {
     b.position.x = birdsMotion.x;
     b.position.y = birdsMotion.y;
 
-    b.position.z -= birdsMotion.speed * dt;
+    b.position.z += birdsMotion.speed * dt;
 
-    if (b.position.z <= birdsMotion.zMin) {
-      b.position.z = birdsMotion.zMax;
+    if (b.position.z >= birdsMotion.zMax) {
+      b.position.z = birdsMotion.zMin;
     }
 
     b.rotation.y = Math.PI;
