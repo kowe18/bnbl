@@ -136,6 +136,89 @@ controls.update();
 window.camera = camera;
 window.controls = controls;
 
+// zakomentarises za otkljucanu kameru odavdje :
+
+controls.enableRotate = false;
+controls.enableZoom = false;
+controls.enablePan = false;
+controls.enabled = false;
+
+const fixedCamPos = camera.position.clone();
+
+const head = {
+  yaw0: 0,
+  pitch0: 0,
+  yaw: 0,
+  pitch: 0,
+  sensitivity: 0.002,
+
+  maxYaw: THREE.MathUtils.degToRad(15),
+  maxPitch: THREE.MathUtils.degToRad(10),
+};
+
+function initHeadFromCurrentView() {
+  const startDir = new THREE.Vector3();
+  camera.getWorldDirection(startDir);
+
+  head.yaw0 = Math.atan2(startDir.x, startDir.z);
+  head.pitch0 = Math.asin(THREE.MathUtils.clamp(startDir.y, -1, 1));
+
+  head.yaw = 0;
+  head.pitch = 0;
+}
+
+initHeadFromCurrentView();
+
+let mouseActive = false;
+
+renderer.domElement.addEventListener("mousedown", () => {
+  mouseActive = true;
+});
+
+window.addEventListener("mouseup", () => {
+  mouseActive = false;
+});
+
+window.addEventListener("mousemove", (e) => {
+  if (!mouseActive) return;
+
+  head.yaw   -= e.movementX * head.sensitivity;
+  head.pitch -= e.movementY * head.sensitivity;
+
+  head.yaw = THREE.MathUtils.clamp(head.yaw, -head.maxYaw, head.maxYaw);
+  head.pitch = THREE.MathUtils.clamp(head.pitch, -head.maxPitch, head.maxPitch);
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "KeyR") {
+    head.yaw = 0;
+    head.pitch = 0;
+  }
+});
+
+const _lookDir = new THREE.Vector3();
+
+function applyHeadLookEachFrame() {
+  camera.position.copy(fixedCamPos);
+
+  const yaw = head.yaw0 + head.yaw;
+  const pitch = head.pitch0 + head.pitch;
+
+  _lookDir.set(
+    Math.sin(yaw) * Math.cos(pitch),
+    Math.sin(pitch),
+    Math.cos(yaw) * Math.cos(pitch)
+  );
+
+  camera.lookAt(
+    camera.position.x + _lookDir.x,
+    camera.position.y + _lookDir.y,
+    camera.position.z + _lookDir.z
+  );
+}
+
+// do ovdje
+
 const sky = new Sky();
 sky.scale.setScalar(300);
 scene.add(sky);
@@ -480,6 +563,8 @@ renderer.setAnimationLoop(() => {
     b.rotation.y = Math.PI;
   }
 
+
+  applyHeadLookEachFrame(); // zakomentarises
   stats.update();
   composer.render();
 
