@@ -24,12 +24,33 @@ function setEmissiveOrColor(mesh, hex, intensity = 1.5) {
   }
 }
 
+function makeLedMaterial(mesh) {
+  if (!mesh) return;
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+  for (const m of mats) {
+    if (!m) continue;
+
+    m.toneMapped = false;
+
+    if ("roughness" in m) m.roughness = Math.min(m.roughness, 0.45);
+    if ("metalness" in m) m.metalness = Math.max(m.metalness, 0.05);
+
+    m.needsUpdate = true;
+  }
+}
+
+
 export function createDriverIndicators(root, { screenName, lampName }) {
   const screenObj = root.getObjectByName(screenName);
   const lampObj = root.getObjectByName(lampName);
 
   const screen = firstMesh(screenObj);
   const lamp = firstMesh(lampObj);
+
+  makeLedMaterial(screen);
+  makeLedMaterial(lamp);
+
 
   console.log("screenObj:", screenObj?.name, "-> mesh:", screen?.name);
   console.log("lampObj:", lampObj?.name, "-> mesh:", lamp?.name);
@@ -106,9 +127,9 @@ export function createDriverIndicators(root, { screenName, lampName }) {
       return;
     }
     if (code === "10") { // zaspan
-      setEmissiveOrColor(screen, 0x330000, 2.5);
-      setLedState(0xff0000, 28.0, 7.0, 3.4);
-      ledSpot.intensity = 20.6;
+      setEmissiveOrColor(screen, 0x330000, 6.0);
+      setLedState(0xff0000, 40.0, 7.0, 8.0);
+      ledSpot.intensity = 15.6;
       return;
     }
 

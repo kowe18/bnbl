@@ -6,6 +6,11 @@ import { Sky } from "three/addons/objects/Sky.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import Stats from "three/addons/libs/stats.module.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
 
 import { createDriverIndicators } from "./src/interaction/driverIndicators.js";
 import { attachStateInputDemo } from "./src/interaction/stateInputDemo.js";
@@ -81,6 +86,26 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.style.margin = "0";
 document.body.appendChild(renderer.domElement);
 
+renderer.setPixelRatio(window.devicePixelRatio);
+
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.5, // strength 
+  0.15, // radius
+  0.75 // threshold 
+);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
+
+window.bloomPass = bloomPass;
+
+
 // Stats monitor (FPS counter)
 const stats = new Stats();
 stats.dom.style.position = 'fixed';
@@ -119,7 +144,7 @@ const skyUniforms = sky.material.uniforms;
 
 skyUniforms.turbidity.value = 8;
 skyUniforms.rayleigh.value = 2;
-skyUniforms.mieCoefficient.value = 0.005;
+skyUniforms.mieCoefficient.value = 0.003;
 skyUniforms.mieDirectionalG.value = 0.8;
 
 
@@ -431,6 +456,10 @@ window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  composer.setSize(window.innerWidth, window.innerHeight);
+  bloomPass.setSize(window.innerWidth, window.innerHeight);
+
 });
 
 renderer.setAnimationLoop(() => {
@@ -452,7 +481,8 @@ renderer.setAnimationLoop(() => {
   }
 
   stats.update();
-  renderer.render(scene, camera);
+  composer.render();
+
 });
 
 
