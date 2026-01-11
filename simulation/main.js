@@ -362,6 +362,8 @@ async function init() {
     lampName: "LED_trak_LED_bar",
     });
 
+    indicators.setDriverTargetWorld(camera.position);
+
   } catch (e) {
     console.error("Load error:", e);
   }

@@ -26,31 +26,98 @@ function setEmissiveOrColor(mesh, hex, intensity = 1.5) {
 
 export function createDriverIndicators(root, { screenName, lampName }) {
   const screenObj = root.getObjectByName(screenName);
-  const lampObj   = root.getObjectByName(lampName);
+  const lampObj = root.getObjectByName(lampName);
 
-  // ako su Group, uzmi prvi mesh unutra
   const screen = firstMesh(screenObj);
-  const lamp   = firstMesh(lampObj);
+  const lamp = firstMesh(lampObj);
 
   console.log("screenObj:", screenObj?.name, "-> mesh:", screen?.name);
   console.log("lampObj:", lampObj?.name, "-> mesh:", lamp?.name);
 
-  function applyDriverState(code) {
-    console.log("applyDriverState:", code);
+  const ledSpot = new THREE.SpotLight(0x00ff00, 0, 8.0, Math.PI / 7, 0.4, 2);
+  ledSpot.castShadow = false;
 
-    if (code === "00") { // budan
-      setEmissiveOrColor(lamp,   0x00ff00, 2.0);
-      setEmissiveOrColor(screen, 0x003300, 2.5);
-    }
-    if (code === "01") { // utrujen
-      setEmissiveOrColor(lamp,   0xffff00, 2.0);
-      setEmissiveOrColor(screen, 0x333300, 2.5);
-    }
-    if (code === "10") { // zaspan
-      setEmissiveOrColor(lamp,   0xff0000, 2.0);
-      setEmissiveOrColor(screen, 0x330000, 2.5);
-    }
+  const target = new THREE.Object3D();
+
+  if (lampObj) {
+    lampObj.add(ledSpot);
+    ledSpot.position.set(0, 1, 0.08);
+
+    root.add(target);
+    ledSpot.target = target;
   }
 
-  return { applyDriverState };
+  const spill = new THREE.PointLight(0x00ff00, 0, 2.0);
+  spill.decay = 2;
+  if (lampObj) {
+    lampObj.add(spill);
+    spill.position.set(0, 0, 0.05);
+  }
+
+  function setDriverTargetWorld(worldPos) {
+    if (!worldPos) return;
+    const p = worldPos.clone();
+    root.worldToLocal(p);
+    target.position.copy(p);
+    target.updateMatrixWorld(true);
+  }
+
+  function setLedState(hex, spotIntensity, spotDistance, emissiveIntensity) {
+    setEmissiveOrColor(lamp, hex, emissiveIntensity);
+
+    ledSpot.color.set(hex);
+    ledSpot.intensity = spotIntensity;
+    ledSpot.distance = spotDistance;
+
+    spill.color.set(hex);
+    spill.intensity = spotIntensity * 0.15;
+    spill.distance = Math.max(1.0, spotDistance * 0.6);
+  }
+
+  ledSpot.intensity = 5.6;
+  ledSpot.distance  = 3.8;
+  ledSpot.decay     = 1.78;
+  ledSpot.angle     = 0.56;
+  ledSpot.penumbra  = 0.34;
+
+  ledSpot.position.set(0.65, 1.69, -1.05);
+
+  spill.intensity = 2.01;
+  spill.distance  = 5.6;
+
+  target.position.set(1.544497, 1.931363, -0.28992);
+
+  setEmissiveOrColor(screen, 0x003300, 2.5);
+  setLedState(0x00ff00, 18.0, 6.0, 2.8);
+  ledSpot.intensity = 5.6;
+
+
+  function applyDriverState(code) {
+    if (code === "00") { // budan
+      setEmissiveOrColor(screen, 0x003300, 2.5);
+      setLedState(0x00ff00, 18.0, 6.0, 2.8);
+      ledSpot.intensity = 5.6;
+      return;
+    }
+    if (code === "01") { // utrujen
+      setEmissiveOrColor(screen, 0x333300, 2.5);
+      setLedState(0xffff00, 22.0, 6.5, 3.0);
+      ledSpot.intensity = 10.6;
+      return;
+    }
+    if (code === "10") { // zaspan
+      setEmissiveOrColor(screen, 0x330000, 2.5);
+      setLedState(0xff0000, 28.0, 7.0, 3.4);
+      ledSpot.intensity = 20.6;
+      return;
+    }
+
+    // off / unknown
+    setEmissiveOrColor(screen, 0x000000, 0.0);
+    setLedState(0x000000, 0.0, 2.0, 0.0);
+    ledSpot.intensity = 5.6;
+  }
+
+  return { applyDriverState, setDriverTargetWorld, ledSpot, target, spill };
+
 }
