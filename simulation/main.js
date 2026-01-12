@@ -31,11 +31,11 @@ const mixers = [];
 const birds = [];
 
 const birdsMotion = {
-  zMin: -80,
-  zMax:  80,
+  zMin: -65,
+  zMax:  65,
   speed: 5,
-  x: 70,
-  y: 20
+  x: 43,
+  y: 13
 };
 
 
@@ -262,6 +262,18 @@ skyUniforms.sunPosition.value.copy(sun);
 const gui = new GUI();
 gui.title('Scene Controls');
 
+gui.domElement.style.display = 'none';
+stats.dom.style.display = 'none';
+
+const conn = document.getElementById("connection-status");
+if (conn) conn.style.display = 'none';
+
+const info = document.getElementById('info-panel');
+if (info) info.style.display = 'none';
+
+const perf = document.getElementById('perf-panel');
+if (perf) perf.style.display = 'none';
+
 const lightingFolder = gui.addFolder('Lighting');
 lightingFolder.add(ambientLight, 'intensity', 0, 2, 0.1).name('Ambient Light');
 lightingFolder.add(dir, 'intensity', 0, 3, 0.1).name('Directional Light');
@@ -344,7 +356,7 @@ const viewSettings = {
 };
 
 // Keyboard listener with capture phase (executes BEFORE stateInputDemo)
-let uiVisible = true;
+let uiVisible = false;
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'u' || e.key === 'U') {
