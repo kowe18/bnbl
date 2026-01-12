@@ -338,6 +338,52 @@ cameraFolder.add(cameraPresets, 'Driver View');
 cameraFolder.add(cameraPresets, 'Exterior View');
 cameraFolder.add(cameraPresets, 'Top View');
 
+// User View Mode - Hide all UI with keyboard shortcut
+const viewSettings = {
+  userView: false
+};
+
+// Keyboard listener with capture phase (executes BEFORE stateInputDemo)
+let uiVisible = true;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'u' || e.key === 'U') {
+    e.stopImmediatePropagation(); // Stop other listeners from firing
+    
+    uiVisible = !uiVisible;
+    
+    // Toggle GUI
+    gui.domElement.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Stats
+    stats.dom.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Connection Status
+    const conn = document.getElementById("connection-status");
+    if (conn) conn.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Info Panel
+    const info = document.getElementById('info-panel');
+    if (info) info.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Performance Panel
+    const perf = document.getElementById('perf-panel');
+    if (perf) perf.style.display = uiVisible ? 'block' : 'none';
+    
+    console.log(uiVisible ? '� Dev UI: ON' : '�👁️ User View: ON (Press U to toggle)');
+  }
+}, true); // TRUE = capture phase, runs BEFORE bubble phase
+
+gui.add(viewSettings, 'userView').name('👁️ User View (Clean)').onChange((value) => {
+  if (value) {
+    uiVisible = false;
+    gui.domElement.style.display = 'none';
+    stats.dom.style.display = 'none';
+    const conn = document.getElementById("connection-status");
+    if (conn) conn.style.display = 'none';
+    const info = document.getElementById('info-panel');
+    if (info) info.style.display = 'none';
+    
+    console.log('👁️ User View Mode: ON (Press U to toggle back)');
+  }
+});
+
 // Raycaster for click interactions
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
