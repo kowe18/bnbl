@@ -1,4 +1,3 @@
-import { createPerfTracker } from "./src/interaction/perf.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
@@ -11,7 +10,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-
+import { Lensflare, LensflareElement } from "three/addons/objects/Lensflare.js";
 
 import { createDriverIndicators } from "./src/interaction/driverIndicators.js";
 import { attachStateInputDemo } from "./src/interaction/stateInputDemo.js";
@@ -20,7 +19,6 @@ const loadingManager = new THREE.LoadingManager();
 const progressBar = document.getElementById('progress-fill');
 const loadingText = document.getElementById('loading-text');
 const loadingScreen = document.getElementById('loading-screen');
-const perf = createPerfTracker();
 
 
 let controlBoxObj = null;
@@ -55,8 +53,6 @@ loadingManager.onProgress = (url, loaded, total) => {
 
 loadingManager.onLoad = () => {
   console.log('All models loaded!');
-  perf.markModelsLoaded();
-
   loadingText.textContent = 'Complete!';
   setTimeout(() => {
     loadingScreen.classList.add('hidden');
@@ -128,6 +124,22 @@ dir.castShadow = true;
 dir.shadow.mapSize.width = 2048;
 dir.shadow.mapSize.height = 2048;
 scene.add(dir);
+
+// Add lens flare to directional light (sun effect)
+const textureLoader = new THREE.TextureLoader();
+const textureFlare0 = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png');
+const textureFlare3 = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare3.png');
+
+const lensflare = new Lensflare();
+lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, dir.color));
+lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
+lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
+lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
+lensflare.addElement(new LensflareElement(textureFlare3, 70, 1));
+dir.add(lensflare);
+
+// Add fog for atmospheric depth
+scene.fog = new THREE.Fog(0xcccccc, 10, 100);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -250,20 +262,6 @@ skyUniforms.sunPosition.value.copy(sun);
 const gui = new GUI();
 gui.title('Scene Controls');
 
-const effectsFolder = gui.addFolder('Effects');
-
-const bloomSettings = {
-  enabled: true
-};
-
-effectsFolder
-  .add(bloomSettings, 'enabled')
-  .name('Bloom')
-  .onChange((v) => {
-    bloomPass.enabled = v;
-  });
-
-
 const lightingFolder = gui.addFolder('Lighting');
 lightingFolder.add(ambientLight, 'intensity', 0, 2, 0.1).name('Ambient Light');
 lightingFolder.add(dir, 'intensity', 0, 3, 0.1).name('Directional Light');
@@ -272,6 +270,48 @@ const skyFolder = gui.addFolder('Sky');
 skyFolder.add(skyUniforms.turbidity, 'value', 0, 20, 0.1).name('Turbidity');
 skyFolder.add(skyUniforms.rayleigh, 'value', 0, 4, 0.1).name('Rayleigh');
 skyFolder.add(skyUniforms.mieCoefficient, 'value', 0, 0.1, 0.001).name('Mie Coefficient');
+
+// Post-processing effects controls
+const specialEffectsFolder = gui.addFolder('Special Effects');
+const effectsSettings = {
+  bloomEnabled: true,
+  bloomStrength: 1.5,
+  bloomRadius: 0.4,
+  bloomThreshold: 0.85,
+  lensflareEnabled: true,
+  fogEnabled: true,
+  fogNear: 10,
+  fogFar: 100
+};
+
+specialEffectsFolder.add(effectsSettings, 'bloomEnabled').name('Bloom Effect').onChange((value) => {
+  bloomPass.enabled = value;
+});
+specialEffectsFolder.add(effectsSettings, 'bloomStrength', 0, 3, 0.1).name('Bloom Strength').onChange((value) => {
+  bloomPass.strength = value;
+});
+specialEffectsFolder.add(effectsSettings, 'bloomRadius', 0, 1, 0.01).name('Bloom Radius').onChange((value) => {
+  bloomPass.radius = value;
+});
+specialEffectsFolder.add(effectsSettings, 'bloomThreshold', 0, 1, 0.01).name('Bloom Threshold').onChange((value) => {
+  bloomPass.threshold = value;
+});
+specialEffectsFolder.add(effectsSettings, 'lensflareEnabled').name('Lens Flare').onChange((value) => {
+  lensflare.visible = value;
+});
+specialEffectsFolder.add(effectsSettings, 'fogEnabled').name('Fog Effect').onChange((value) => {
+  if (value) {
+    scene.fog = new THREE.Fog(0xcccccc, effectsSettings.fogNear, effectsSettings.fogFar);
+  } else {
+    scene.fog = null;
+  }
+});
+specialEffectsFolder.add(effectsSettings, 'fogNear', 1, 50, 1).name('Fog Near').onChange((value) => {
+  if (scene.fog) scene.fog.near = value;
+});
+specialEffectsFolder.add(effectsSettings, 'fogFar', 50, 200, 1).name('Fog Far').onChange((value) => {
+  if (scene.fog) scene.fog.far = value;
+});
 
 const cameraFolder = gui.addFolder('Camera');
 const cameraPresets = {
@@ -526,7 +566,6 @@ function connectWebSocket() {
     };
 
     ws.onmessage = (e) => {
-              perf.tickWsMessage();
       try {
         const msg = JSON.parse(e.data);
         const code = String(msg.status_code).trim();
@@ -587,8 +626,6 @@ renderer.setAnimationLoop(() => {
 
 
   applyHeadLookEachFrame(); 
-  perf.markFirstFrame();
-perf.tickFrame();
 
   stats.update();
   composer.render();
