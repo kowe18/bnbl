@@ -1,3 +1,4 @@
+import { createPerfTracker } from "./src/interaction/perf.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
@@ -19,6 +20,8 @@ const loadingManager = new THREE.LoadingManager();
 const progressBar = document.getElementById('progress-fill');
 const loadingText = document.getElementById('loading-text');
 const loadingScreen = document.getElementById('loading-screen');
+const perf = createPerfTracker();
+
 
 let controlBoxObj = null;
 let indicators = null;
@@ -52,11 +55,14 @@ loadingManager.onProgress = (url, loaded, total) => {
 
 loadingManager.onLoad = () => {
   console.log('All models loaded!');
+  perf.markModelsLoaded();
+
   loadingText.textContent = 'Complete!';
   setTimeout(() => {
     loadingScreen.classList.add('hidden');
   }, 500);
 };
+
 
 loadingManager.onError = (url) => {
   console.error('Error loading:', url);
@@ -243,6 +249,20 @@ skyUniforms.sunPosition.value.copy(sun);
 // GUI Controls
 const gui = new GUI();
 gui.title('Scene Controls');
+
+const effectsFolder = gui.addFolder('Effects');
+
+const bloomSettings = {
+  enabled: true
+};
+
+effectsFolder
+  .add(bloomSettings, 'enabled')
+  .name('Bloom')
+  .onChange((v) => {
+    bloomPass.enabled = v;
+  });
+
 
 const lightingFolder = gui.addFolder('Lighting');
 lightingFolder.add(ambientLight, 'intensity', 0, 2, 0.1).name('Ambient Light');
@@ -476,18 +496,19 @@ async function init() {
     console.error("Load error:", e);
   }
 }
+const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3001";
 
 // WebSocket real-time data iz Dockera
-const connectionStatus = document.getElementById('connection-status');
+const connectionStatus = document.getElementById("connection-status");
 let ws;
 
 function connectWebSocket() {
   try {
-    ws = new WebSocket("ws://172.25.86.22:3001");
+    ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
-      console.log("WS OPEN");
-      connectionStatus.textContent = "WebSocket: Connected";
+      console.log("WS OPEN", WS_URL);
+      connectionStatus.textContent = `WebSocket: Connected (${WS_URL})`;
       connectionStatus.className = "status-connected";
     };
 
@@ -501,17 +522,16 @@ function connectWebSocket() {
       console.log("WS CLOSE");
       connectionStatus.textContent = "WebSocket: Disconnected";
       connectionStatus.className = "status-disconnected";
-      
-      // Attempt reconnection after 5 seconds
       setTimeout(connectWebSocket, 5000);
     };
 
-    // Prihaja JSON: {"status_code":"10"}
     ws.onmessage = (e) => {
+              perf.tickWsMessage();
       try {
         const msg = JSON.parse(e.data);
-        const code = String(msg.status_code).trim(); // "00"/"01"/"10"
-        indicators.applyDriverState(code);
+        const code = String(msg.status_code).trim();
+
+        if (indicators) indicators.applyDriverState(code);
       } catch (err) {
         console.warn("Bad WS message:", e.data, err);
       }
@@ -523,9 +543,11 @@ function connectWebSocket() {
   }
 }
 
-connectWebSocket();
 
-attachStateInputDemo((code) => indicators.applyDriverState(code));
+init().then(() => {
+  connectWebSocket();
+  attachStateInputDemo((code) => indicators?.applyDriverState(code));
+});
 
 
 
@@ -533,7 +555,7 @@ controls.enableRotate = true;
 controls.enableZoom = true;
 controls.enablePan = true;
 
-init();
+//init();
 
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -564,9 +586,13 @@ renderer.setAnimationLoop(() => {
   }
 
 
-  applyHeadLookEachFrame(); // zakomentarises
+  applyHeadLookEachFrame(); 
+  perf.markFirstFrame();
+perf.tickFrame();
+
   stats.update();
   composer.render();
+  
 
 });
 
