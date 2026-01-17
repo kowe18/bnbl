@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "mqtt": "^5.0.0",
+    "ws": "^8.0.0"
+  }
+}

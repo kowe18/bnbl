@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <body>
+    <h3>WS test</h3>
+    <pre id="log"></pre>
+    <script>
+      const log = (x) => document.getElementById("log").textContent += x + "\n";
+      const ws = new WebSocket("ws://172.25.86.22:3001");
+      ws.onopen = () => log("OPEN");
+      ws.onmessage = (e) => log("MSG: " + e.data);
+      ws.onerror = (e) => log("ERROR");
+      ws.onclose = () => log("CLOSE");
+    </script>
+  </body>
+</html>
+
