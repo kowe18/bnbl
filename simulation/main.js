@@ -1,4 +1,3 @@
-import { createPerfTracker } from "./src/interaction/perf.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
@@ -11,7 +10,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-
+import { Lensflare, LensflareElement } from "three/addons/objects/Lensflare.js";
 
 import { createDriverIndicators } from "./src/interaction/driverIndicators.js";
 import { attachStateInputDemo } from "./src/interaction/stateInputDemo.js";
@@ -20,7 +19,6 @@ const loadingManager = new THREE.LoadingManager();
 const progressBar = document.getElementById('progress-fill');
 const loadingText = document.getElementById('loading-text');
 const loadingScreen = document.getElementById('loading-screen');
-const perf = createPerfTracker();
 
 
 let controlBoxObj = null;
@@ -33,11 +31,11 @@ const mixers = [];
 const birds = [];
 
 const birdsMotion = {
-  zMin: -80,
-  zMax:  80,
+  zMin: -65,
+  zMax:  65,
   speed: 5,
-  x: 70,
-  y: 20
+  x: 43,
+  y: 13
 };
 
 
@@ -55,8 +53,6 @@ loadingManager.onProgress = (url, loaded, total) => {
 
 loadingManager.onLoad = () => {
   console.log('All models loaded!');
-  perf.markModelsLoaded();
-
   loadingText.textContent = 'Complete!';
   setTimeout(() => {
     loadingScreen.classList.add('hidden');
@@ -118,35 +114,46 @@ stats.dom.style.position = 'fixed';
 stats.dom.style.bottom = '0px';
 stats.dom.style.top = 'auto';
 document.body.appendChild(stats.dom);
+
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 scene.add(ambientLight);
 
 const dir = new THREE.DirectionalLight(0xffffff, 1.0);
-dir.position.set(5, 10, 5);
-
+dir.position.set(50, 17.8, -17);
 dir.castShadow = true;
 
-// kvaliteta sence
-dir.shadow.mapSize.set(2048, 2048);
+dir.shadow.camera.near = 0.1;
+dir.shadow.camera.far = 300;
 
-// Shadow-camera frustum 
-dir.shadow.camera.near = 0.5;
-dir.shadow.camera.far = 200;
+const d = 40;
+dir.shadow.camera.left   = -d;
+dir.shadow.camera.right  =  d;
+dir.shadow.camera.top    =  d;
+dir.shadow.camera.bottom = -d;
 
-dir.shadow.camera.left = -80;
-dir.shadow.camera.right = 80;
-dir.shadow.camera.top = 80;
-dir.shadow.camera.bottom = -80;
+dir.shadow.bias = -0.0001;
+dir.shadow.normalBias = 0.02;
 
-// pomaga proti “acne”/črtam
-dir.shadow.bias = -0.0005;
-
+dir.shadow.mapSize.width = 2048;
+dir.shadow.mapSize.height = 2048;
 scene.add(dir);
 
+// Add lens flare to directional light (sun effect)
+const textureLoader = new THREE.TextureLoader();
+const textureFlare0 = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png');
+const textureFlare3 = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare3.png');
 
-// DEBUG: pokaže območje, kjer se sence sploh računajo
-//const dirShadowHelper = new THREE.CameraHelper(dir.shadow.camera);
-//scene.add(dirShadowHelper);
+const lensflare = new Lensflare();
+lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, dir.color));
+lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
+lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
+lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
+lensflare.addElement(new LensflareElement(textureFlare3, 70, 1));
+dir.add(lensflare);
+
+// Add fog for atmospheric depth
+scene.fog = new THREE.Fog(0xcccccc, 10, 100);
+scene.fog = null;
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -269,19 +276,17 @@ skyUniforms.sunPosition.value.copy(sun);
 const gui = new GUI();
 gui.title('Scene Controls');
 
-const effectsFolder = gui.addFolder('Effects');
+gui.domElement.style.display = 'none';
+stats.dom.style.display = 'none';
 
-const bloomSettings = {
-  enabled: true
-};
+const conn = document.getElementById("connection-status");
+if (conn) conn.style.display = 'none';
 
-effectsFolder
-  .add(bloomSettings, 'enabled')
-  .name('Bloom')
-  .onChange((v) => {
-    bloomPass.enabled = v;
-  });
+const info = document.getElementById('info-panel');
+if (info) info.style.display = 'none';
 
+const perf = document.getElementById('perf-panel');
+if (perf) perf.style.display = 'none';
 
 const lightingFolder = gui.addFolder('Lighting');
 lightingFolder.add(ambientLight, 'intensity', 0, 2, 0.1).name('Ambient Light');
@@ -291,6 +296,48 @@ const skyFolder = gui.addFolder('Sky');
 skyFolder.add(skyUniforms.turbidity, 'value', 0, 20, 0.1).name('Turbidity');
 skyFolder.add(skyUniforms.rayleigh, 'value', 0, 4, 0.1).name('Rayleigh');
 skyFolder.add(skyUniforms.mieCoefficient, 'value', 0, 0.1, 0.001).name('Mie Coefficient');
+
+// Post-processing effects controls
+const specialEffectsFolder = gui.addFolder('Special Effects');
+const effectsSettings = {
+  bloomEnabled: true,
+  bloomStrength: 1.5,
+  bloomRadius: 0.4,
+  bloomThreshold: 0.85,
+  lensflareEnabled: true,
+  fogEnabled: false,
+  fogNear: 10,
+  fogFar: 100
+};
+
+specialEffectsFolder.add(effectsSettings, 'bloomEnabled').name('Bloom Effect').onChange((value) => {
+  bloomPass.enabled = value;
+});
+specialEffectsFolder.add(effectsSettings, 'bloomStrength', 0, 3, 0.1).name('Bloom Strength').onChange((value) => {
+  bloomPass.strength = value;
+});
+specialEffectsFolder.add(effectsSettings, 'bloomRadius', 0, 1, 0.01).name('Bloom Radius').onChange((value) => {
+  bloomPass.radius = value;
+});
+specialEffectsFolder.add(effectsSettings, 'bloomThreshold', 0, 1, 0.01).name('Bloom Threshold').onChange((value) => {
+  bloomPass.threshold = value;
+});
+specialEffectsFolder.add(effectsSettings, 'lensflareEnabled').name('Lens Flare').onChange((value) => {
+  lensflare.visible = value;
+});
+specialEffectsFolder.add(effectsSettings, 'fogEnabled').name('Fog Effect').onChange((value) => {
+  if (value) {
+    scene.fog = new THREE.Fog(0xcccccc, effectsSettings.fogNear, effectsSettings.fogFar);
+  } else {
+    scene.fog = null;
+  }
+});
+specialEffectsFolder.add(effectsSettings, 'fogNear', 1, 50, 1).name('Fog Near').onChange((value) => {
+  if (scene.fog) scene.fog.near = value;
+});
+specialEffectsFolder.add(effectsSettings, 'fogFar', 50, 200, 1).name('Fog Far').onChange((value) => {
+  if (scene.fog) scene.fog.far = value;
+});
 
 
 const cameraFolder = gui.addFolder('Camera');
@@ -317,6 +364,52 @@ const cameraPresets = {
 cameraFolder.add(cameraPresets, 'Driver View');
 cameraFolder.add(cameraPresets, 'Exterior View');
 cameraFolder.add(cameraPresets, 'Top View');
+
+// User View Mode - Hide all UI with keyboard shortcut
+const viewSettings = {
+  userView: false
+};
+
+// Keyboard listener with capture phase (executes BEFORE stateInputDemo)
+let uiVisible = false;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'u' || e.key === 'U') {
+    e.stopImmediatePropagation(); // Stop other listeners from firing
+    
+    uiVisible = !uiVisible;
+    
+    // Toggle GUI
+    gui.domElement.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Stats
+    stats.dom.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Connection Status
+    const conn = document.getElementById("connection-status");
+    if (conn) conn.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Info Panel
+    const info = document.getElementById('info-panel');
+    if (info) info.style.display = uiVisible ? 'block' : 'none';
+    // Toggle Performance Panel
+    const perf = document.getElementById('perf-panel');
+    if (perf) perf.style.display = uiVisible ? 'block' : 'none';
+    
+    console.log(uiVisible ? '� Dev UI: ON' : '�👁️ User View: ON (Press U to toggle)');
+  }
+}, true); // TRUE = capture phase, runs BEFORE bubble phase
+
+gui.add(viewSettings, 'userView').name('👁️ User View (Clean)').onChange((value) => {
+  if (value) {
+    uiVisible = false;
+    gui.domElement.style.display = 'none';
+    stats.dom.style.display = 'none';
+    const conn = document.getElementById("connection-status");
+    if (conn) conn.style.display = 'none';
+    const info = document.getElementById('info-panel');
+    if (info) info.style.display = 'none';
+    
+    console.log('👁️ User View Mode: ON (Press U to toggle back)');
+  }
+});
 
 // Raycaster for click interactions
 const raycaster = new THREE.Raycaster();
@@ -427,16 +520,24 @@ function loadObjMtl(basePath, objFile, mtlFile) {
   });
 }
 
-function enableShadows(obj, { cast = true, receive = true } = {}) {
-  if (!obj) return;
-  obj.traverse((o) => {
+function enableShadowsOn(object3D, { cast = true, receive = true } = {}) {
+  object3D.traverse((o) => {
     if (o.isMesh) {
       o.castShadow = cast;
       o.receiveShadow = receive;
-      // če so teksture čudne, ne rabimo tu nič več
+
+      // Bitno za GLTF/OBJ materijale koji znaju biti "čudni"
+      if (o.material) {
+        if (Array.isArray(o.material)) {
+          o.material.forEach((m) => (m.needsUpdate = true));
+        } else {
+          o.material.needsUpdate = true;
+        }
+      }
     }
   });
 }
+
 
 
 async function init() {
@@ -449,8 +550,7 @@ async function init() {
       "rac_grafika_model_armatura2.mtl"
     );
     scene.add(cabinObj);
-    enableShadows(cabinObj, { cast: true, receive: true });
-
+    enableShadowsOn(cabinObj, { cast: true, receive: true });
 
     // control unit - Milos Avakumovic
     controlBoxObj = await loadObjMtl(
@@ -459,8 +559,7 @@ async function init() {
       "model_1.mtl"
     );
     cabinObj.add(controlBoxObj);
-    enableShadows(controlBoxObj, { cast: true, receive: true });
-
+    enableShadowsOn(controlBoxObj, { cast: true, receive: true });
     controlBoxObj.position.set(2.9, -1.42, -1.7);
     controlBoxObj.rotation.set(0, Math.PI, 0); 
     controlBoxObj.scale.setScalar(2);
@@ -472,8 +571,7 @@ async function init() {
       "bnbl_camera.mtl"
     );
     cabinObj.add(cameraModelObj);
-    enableShadows(cameraModelObj, { cast: true, receive: true });
-
+    enableShadowsOn(cameraModelObj, { cast: true, receive: true });
     cameraModelObj.position.set(1.88, 1.67, -0.5);
     cameraModelObj.rotation.set(0, 10, 0);
     cameraModelObj.scale.setScalar(0.1);
@@ -485,8 +583,7 @@ async function init() {
       "proj.mtl"
     );
     cabinObj.add(standObj);
-    enableShadows(standObj, { cast: true, receive: true });
-
+    enableShadowsOn(standObj, { cast: true, receive: true });
     standObj.position.set(1.33, 1.9, -0.6);
     standObj.rotation.set(0, 0, 0.9);
     standObj.scale.setScalar(1.3);    
@@ -494,9 +591,7 @@ async function init() {
     // mesto - Elbolillo (https://www.fab.com/sellers/Elbolillo)
     const busStop = await loadGLB("/models/city/bus_stop.glb");
     scene.add(busStop);
-    enableShadows(busStop, { cast: true, receive: true });
-
-
+    enableShadowsOn(busStop, { cast: true, receive: true });
     busStop.position.set(0, -1.5, 28);
     busStop.rotation.set(0, 0, 0);
     busStop.scale.setScalar(1.7);
@@ -504,9 +599,7 @@ async function init() {
     // roke - DJMaesen
     const arms = await loadGLB("/models/arms/cartoon_fps_arms.glb");
     scene.add(arms);
-    enableShadows(arms, { cast: true, receive: true });
-
-
+    enableShadowsOn(arms, { cast: true, receive: true });
     arms.position.set(0.67, 1.7, -1.1);
     arms.rotation.set(0, 1.5, 0);
     arms.scale.setScalar(0.0015);
@@ -569,7 +662,6 @@ function connectWebSocket() {
     };
 
     ws.onmessage = (e) => {
-              perf.tickWsMessage();
       try {
         const msg = JSON.parse(e.data);
         const code = String(msg.status_code).trim();
@@ -630,13 +722,9 @@ renderer.setAnimationLoop(() => {
 
 
   applyHeadLookEachFrame(); 
-  perf.markFirstFrame();
-perf.tickFrame();
 
   stats.update();
   composer.render();
   
 
 });
-
-
