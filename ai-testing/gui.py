@@ -8,6 +8,7 @@ from head_drop_detector import head_drop_analysis
 from merging import puttingTogether
 from mlpF import MLP
 from finalOutput import save_pred_video
+from compression_module import compress_yolo_frames, check_any_compressor_available
 
 # ---------------- Main GUI ----------------
 class MainGUI(tk.Tk):
@@ -78,6 +79,30 @@ class MainGUI(tk.Tk):
 
             self._update_status("Shranjevanje video_pred.mp4 …")
             final_vid = save_pred_video(video_path)
+
+            # === NOVA FUNKCIONALNOST: Kompresija frame-ov ===
+            if check_any_compressor_available():
+                self._update_status("Kompresija frame-ov (vsak 5.) …")
+                success, msg, stats = compress_yolo_frames(
+                    compression_factor=8,
+                    status_callback=self._update_status
+                )
+                
+                if success:
+                    # Prikaži statistiko kompresije
+                    stats_msg = (
+                        f"Kompresija uspešna!\n"
+                        f"Frame-ov: {stats.get('compressed_frames', 0)}\n"
+                        f"Originalna velikost: {stats.get('original_size_mb', 0):.2f} MB\n"
+                        f"Stisnjena velikost: {stats.get('compressed_size_mb', 0):.2f} MB\n"
+                        f"Razmerje: {stats.get('compression_ratio', 0):.2f}x"
+                    )
+                    messagebox.showinfo("Kompresija", stats_msg)
+                else:
+                    # Kompresija ni uspela, ampak nadaljujemo
+                    print(f"Opozorilo: {msg}")
+            else:
+                print("Opozorilo: Kompresor ni na voljo - namestite scipy (pip install scipy)")
 
             # Ko je pipeline končan:
             self._update_status("✔ Analiza uspešno zaključena!")
